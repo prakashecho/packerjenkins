@@ -8,7 +8,7 @@ packer {
 }
 
 source "amazon-ebs" "ubuntu" {
-  ami_name      = "Jenkins-AMI1"
+  ami_name      = "Jenkins-AMI"
   instance_type = "t2.small"
   region        = "us-east-1"
   source_ami    = "ami-04b70fa74e45c3917"

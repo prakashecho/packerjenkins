@@ -1,0 +1,48 @@
+name: packer
+
+on:
+  push:
+permissions:
+  id-token: write # This is required for requesting the JWT
+
+env:
+  PRODUCT_VERSION: "1.10.0" # or: "latest"
+
+jobs:
+  packer:
+    runs-on: ubuntu-latest
+    name: Run Packer
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4.0.2
+        with:
+          role-to-assume: arn:aws:iam::874599947932:role/gitaws
+          role-session-name: github-actions
+          aws-region: us-east-1  
+
+      - name: Install AWS CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y awscli
+
+      - name: Setup `packer`
+        uses: hashicorp/setup-packer@v2
+        with:
+          packer_version: "1.8.6" # or a different version
+          plugins: |
+            github.com/hashicorp/amazon@1.3.2 # or the compatible version
+
+      - name: Run `packer init`
+        id: init
+        run: "packer init ./jenkinsubuntu.pkr.hcl"
+
+      - name: Run `packer validate`
+        id: validate
+        run: "packer validate ./jenkinsubuntu.pkr.hcl"
+
+      - name: Run 'packer build'
+        id: build
+        run: packer build  ./jenkinsubuntu.pkr.hcl
